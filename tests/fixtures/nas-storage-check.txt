@@ -1,0 +1,3 @@
+OpenViking NAS 专用目录验证文件。
+模型保存在 NAS 的 openviking/models 目录，文档保存在 openviking/documents 目录。
+应用可以读取此目录中的文本并进行本地向量检索，原文件只读挂载，不会被容器改写。

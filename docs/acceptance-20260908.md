@@ -2,6 +2,8 @@
 
 ## 范围与结论
 
+最新状态为 `0.4.16-9`：已安装，显示名为 `OpenViking`，保留旧安装 ID `openviking-local` 避免数据迁移。用户已取消子域名方案，使用普通 URL。下文早期域名、网关及改名尝试是历史记录，不是当前启用方案。
+
 设备为用户的 ARM64 / RK3588 飞牛 NAS。基线为 OpenViking v0.4.16，纯文本、本地 BGE 512 维 CPU Embedding，不配置 VLM。
 
 这不是全功能或正式发布完成声明：用户已确认飞牛实际生成的子域名在正确路径下可显示公网连接页，远程登录和业务流程仍待验证；NPU 无法初始化，未修改当前 NAS 内核或设备树。没有图片理解或生成式摘要。
@@ -72,3 +74,16 @@ b7e452acaa6784dec4b5ff840b8a3c18001ea94062d5d317ee2072752818e02f
 - 公网：升级 `-7` 后确认图标自动打开正确地址，继续验证远程 Key 登录和业务操作。连接页显示是用户在外网确认的结果，不冒充本机独立公网验收。
 - 标准版 amd64/arm64 及其他 NAS 没有实机验收。
 - NPU 诊断见 [rknpu-diagnosis.md](rknpu-diagnosis.md)，后续刷机或设备树修改需另行授权。
+
+## 0.4.16-9 专用 NAS 目录与显示名称验收
+
+- 显示名统一为 `OpenViking`，兼容包保留原安装 ID。入口为普通 URL `/studio/fnos.html`，没有新增网关、子域名绑定或修改 FN Connect 设置。
+- 资源声明保留 `openviking/models` 和 `openviking/documents`，不再被离线打包逻辑清空。文件通过飞牛“应用文件”共享目录管理，不给整盘或其他个人目录授权。
+- 实际目录为 `/vol1/@appshare/openviking/models` 和 `/vol1/@appshare/openviking/documents`，容器分别挂载到 `/models`、`/nas/documents`，均为只读。含 Key 的私有工作区仍位于原应用数据目录。
+- 升级前停机快照为 `20260908T061528163049Z`，并另存至应用目录外的私有测试目录。官方 `appcenter-cli install-local` 完成旧包停止、重装和 `-9` 启动；原工作区和 Key 保留，旧 NAS 文档检索得分仍为 `0.7461162805557251`。
+- NAS 用户可读模型、可写文档目录；实际容器对两个目录写入均被拒绝。读取 `nas-storage-check.txt` 后上传、入库、检索通过，测试资源为 `viking://resources/fpk-nas-storage-adfa3ab9e437`。
+- 使用共享目录中的 GGUF、`--network none` 验证 512 维 CPU Embedding 通过；模型 SHA-256 与固定值一致。
+- 容器 `running/healthy`、`privileged=false`，安装临时凭据文件已删除。主 NAS 管理页和普通应用 URL 均返回 200，FN Connect 和 nginx 服务仍 active。
+- Linux 25 项测试通过；Windows 跳过 5 项 Linux 生命周期测试。Chrome 控制返回 `Debugger unattached`，未将实机配置及挂载检查冒充设置页视觉验收。
+- 本地与 SMB 兼容安装包 SHA-256 均为 `876dba486171928d69601e66620d370d767db227f920891f57f1a1d233de5f2d`。
+- 本轮未验证标准版或其他 NAS。共享目录不自动建立索引，也不包含在私有工作区快照中，应另行配置 NAS 文件备份。

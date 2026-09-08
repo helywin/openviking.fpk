@@ -1,11 +1,11 @@
 #!/bin/bash
 source "$(dirname "$0")/common.sh"
-if [ "$VARIANT" = local ]; then
+if [ -f "$TRIM_PKGVAR/nas-volumes.json" ]; then
     # Remove only this app's containers/network; never volumes or images.
-    docker compose -p "$TRIM_APPNAME" -f "$TRIM_APPDEST/docker/docker-compose.yaml" down --timeout 30 || fail '应用容器清理失败'
+    compose_app down --timeout 30 || fail '应用容器清理失败'
 fi
 if [ "${wizard_delete_data:-keep}" = delete ]; then
-    name=openviking-fnos
+    name=$CONTAINER_NAME
     state=$(docker inspect --format '{{.State.Running}}' "$name" 2>/dev/null || true)
     [ "$state" != true ] || fail '删除数据前请先在应用中心停止应用'
     helper delete || fail '删除应用数据失败'

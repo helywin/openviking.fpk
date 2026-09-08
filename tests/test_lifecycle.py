@@ -20,9 +20,15 @@ class LifecycleTests(unittest.TestCase):
         docker.write_text('#!/bin/bash\nprintf "%s\\n" "$*" >> "$CALL_LOG"\n'
                           'if [ "$1" = inspect ]; then printf "healthy\\n"; fi\n')
         docker.chmod(0o755)
+        self.documents = self.root / 'shares/openviking/documents'
+        self.models = self.root / 'shares/openviking/models'
+        self.documents.mkdir(parents=True)
+        self.models.mkdir()
+        (self.root / 'nas-volumes.json').write_text('{}')
         self.env = dict(os.environ, PATH=str(self.root) + ':' + os.environ['PATH'],
                         TRIM_APPNAME='openviking', TRIM_APPDEST=str(self.root),
-                        TRIM_PKGVAR=str(self.root), CALL_LOG=str(self.root / 'calls'))
+                        TRIM_PKGVAR=str(self.root), CALL_LOG=str(self.root / 'calls'),
+                        TRIM_DATA_SHARE_PATHS=str(self.documents) + ':' + str(self.models))
 
     def run_script(self, script, *args):
         subprocess.run(['bash', str(CMD / script), *args], env=self.env, check=True, capture_output=True)
@@ -34,6 +40,18 @@ class LifecycleTests(unittest.TestCase):
         self.assertIn('up -d --pull never', calls)
         self.assertIn('openviking-fnos', calls)
         self.assertNotIn('openviking-local', calls)
+
+    def test_legacy_install_keeps_its_container_and_project(self):
+        self.env['TRIM_APPNAME'] = 'openviking-local'
+        calls = self.run_script('main', 'start')
+        self.assertIn('compose -p openviking-local ', calls)
+        self.assertIn('openviking-fnos-local', calls)
+
+    def test_missing_share_fails_before_compose(self):
+        self.env['TRIM_DATA_SHARE_PATHS'] = ''
+        with self.assertRaises(subprocess.CalledProcessError):
+            self.run_script('main', 'start')
+        self.assertNotIn('compose ', (self.root / 'calls').read_text())
 
     def test_local_stop(self):
         calls = self.run_script('main', 'stop')
