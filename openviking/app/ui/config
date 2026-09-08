@@ -1,0 +1,16 @@
+{
+  ".url": {
+    "openviking.main": {
+      "title": "OpenViking",
+      "icon": "images/icon_{0}.png",
+      "type": "url",
+      "protocol": "http",
+      "port": "1933",
+      "url": "/studio/fnos.html",
+      "allUsers": false,
+      "control": {
+        "accessPerm": "readonly"
+      }
+    }
+  }
+}

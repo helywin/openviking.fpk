@@ -1,10 +1,12 @@
 ---
 title: "OpenViking 飞牛 fnOS FPK 打包方案"
-status: "已修订，待实现与真机验收"
-updated_at: "2026-08-31"
+status: "已实现测试版，部分真机验收完成"
+updated_at: "2026-09-08"
 ---
 
 # OpenViking 飞牛 fnOS FPK 打包方案
+
+> 2026-09-08 实施变更：按用户要求，本轮仅做纯文本，不配置 VLM。下文 VLM、自动升级回滚等内容属于原规划，不表示已实现。实际功能、权限与未验收项以根目录 README.md 为准。本地 Embedding、FPK 安装及中文 HTTP 检索已在 RK3588 上验证；生命周期需要 root 权限访问 Docker，但服务容器不挂载 Docker socket。
 
 ## 1. 目标
 

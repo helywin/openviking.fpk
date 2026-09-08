@@ -1,0 +1,13 @@
+appname               = openviking
+version               = 0.4.16-8
+display_name          = OpenViking
+desc                  = OpenViking 上下文数据库，使用外部模型 API。测试版，待 fnOS 真机验收。
+platform              = x86
+source                = thirdparty
+maintainer            = helywin
+distributor           = helywin
+desktop_uidir         = ui
+desktop_applaunchname = openviking.main
+service_port         = 1933
+checkport            = true
+ctl_stop             = true

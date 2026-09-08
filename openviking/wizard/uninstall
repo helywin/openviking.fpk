@@ -1,0 +1,27 @@
+[
+  {
+    "stepTitle": "卸载数据",
+    "items": [
+      {
+        "type": "tips",
+        "helpText": "默认保留数据。选择删除前必须先停止应用，删除后无法恢复。"
+      },
+      {
+        "type": "select",
+        "field": "wizard_delete_data",
+        "label": "应用数据",
+        "initValue": "keep",
+        "options": [
+          {
+            "label": "保留配置和工作区",
+            "value": "keep"
+          },
+          {
+            "label": "删除本应用的全部数据",
+            "value": "delete"
+          }
+        ]
+      }
+    ]
+  }
+]

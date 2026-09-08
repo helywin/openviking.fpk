@@ -1,0 +1,4 @@
+#!/bin/bash
+source "$(dirname "$0")/common.sh"
+configure
+# fnOS manages the container lifecycle; the UI explicitly requests an app restart.

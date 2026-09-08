@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; form-action 'none'">
+  <title>连接工作区 · OpenViking</title>
+  <style>
+    :root { color-scheme: light dark; --bg:#f8fafc; --surface:#fff; --text:#1e293b; --muted:#475569; --border:#94a3b8; --accent:#1d4ed8; --on-accent:#fff; --error:#b91c1c; --ring:#2563eb; }
+    @media(prefers-color-scheme:dark) { :root { --bg:#0f172a; --surface:#172033; --text:#f1f5f9; --muted:#cbd5e1; --border:#64748b; --accent:#93c5fd; --on-accent:#0f172a; --error:#fca5a5; --ring:#93c5fd; } }
+    * { box-sizing:border-box; }
+    body { margin:0; padding:clamp(24px,7vh,72px) 20px; min-height:100dvh; background:var(--bg); color:var(--text); font:16px/1.6 system-ui,"Microsoft YaHei",sans-serif; }
+    main { max-width:520px; margin:auto; }
+    .brand { font-weight:700; letter-spacing:.04em; margin-bottom:32px; }
+    h1 { font-size:clamp(26px,6vw,34px); line-height:1.25; margin:0 0 16px; }
+    p { color:var(--muted); margin:0 0 24px; }
+    form { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:24px; }
+    label { display:block; font-weight:600; margin-bottom:8px; }
+    .field { display:flex; gap:8px; }
+    input { min-width:0; flex:1; font:inherit; padding:10px 12px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text); }
+    button,a { touch-action:manipulation; }
+    button { font:inherit; min-height:48px; border:1px solid var(--border); border-radius:6px; padding:8px 14px; cursor:pointer; background:var(--surface); color:var(--text); transition:opacity 150ms; }
+    button:hover { opacity:.85; }
+    button:disabled { cursor:wait; opacity:.6; }
+    :focus-visible { outline:3px solid var(--ring); outline-offset:3px; }
+    .primary { width:100%; background:var(--accent); color:var(--on-accent); border-color:var(--accent); font-weight:600; }
+    .hint { font-size:14px; margin:12px 0 20px; }
+    #status { min-height:26px; margin:12px 0; color:var(--error); overflow-wrap:anywhere; }
+    .foot { margin-top:24px; font-size:14px; }
+    a { color:var(--accent); display:inline-block; padding:10px 0; min-height:44px; }
+    @media(prefers-reduced-motion:reduce) { button { transition:none; } }
+  </style>
+</head>
+<body>
+<main>
+  <div class="brand">OpenViking / 飞牛</div>
+  <h1>连接你的本地工作区</h1>
+  <p>模型和工作区已由应用初始化。验证安装时设置的 Key，即可开始管理文件和检索文本。</p>
+  <form id="connect">
+    <label for="key">OpenViking Root API Key</label>
+    <div class="field">
+      <input id="key" type="password" autocomplete="current-password" required minlength="24" aria-describedby="hint status" spellcheck="false">
+      <button id="reveal" type="button" aria-controls="key" aria-pressed="false">显示</button>
+    </div>
+    <p id="hint" class="hint">这是安装向导中的 OpenViking Key，不是飞牛账号密码。</p>
+    <button id="submit" class="primary" type="submit">连接并打开 Studio</button>
+    <div id="status" role="status" aria-live="polite"></div>
+    <p class="hint">工作区凭据会保存在当前浏览器，请只在信任的设备上连接。Root Key 不会保存在连接设置中。</p>
+  </form>
+  <div class="foot">
+    <a href="/studio/home">打开已有 Studio 连接</a>
+    <p>忘记 Key？可在飞牛应用配置向导中重新设置后重启应用。纯文本模式不提供图片理解或生成式摘要。</p>
+    <p id="transport" hidden>当前为 HTTP 局域网连接，请仅在可信网络中使用；远程访问应通过 HTTPS 入口。</p>
+  </div>
+</main>
+<script>
+  const form=document.querySelector('#connect'), key=document.querySelector('#key'), submit=document.querySelector('#submit'), status=document.querySelector('#status'), reveal=document.querySelector('#reveal');
+  document.querySelector('#transport').hidden=location.protocol==='https:';
+  const prefix=location.pathname.split('/studio/')[0];
+  document.querySelector('.foot a').href=prefix+'/studio/home';
+  reveal.addEventListener('click',()=>{ const visible=key.type==='password'; key.type=visible?'text':'password'; reveal.textContent=visible?'隐藏':'显示'; reveal.setAttribute('aria-pressed',String(visible)); });
+  form.addEventListener('submit',async event=>{
+    event.preventDefault(); status.textContent='正在验证工作区…'; submit.disabled=true; key.readOnly=true;
+    const controller=new AbortController(), timeout=setTimeout(()=>controller.abort(),15000);
+    try {
+      const response=await fetch(prefix+'/api/v1/admin/accounts/fnos/users',{headers:{'X-API-Key':key.value},cache:'no-store',signal:controller.signal});
+      if(response.status===401||response.status===403) throw new Error('Key 无效或没有管理权限，请检查安装时设置的 Key。');
+      if(!response.ok) throw new Error('工作区暂不可用，请确认应用已启动并稍后重试。');
+      const data=await response.json();
+      const owner=Array.isArray(data.result)?data.result.find(user=>user.user_id==='owner'&&user.role==='admin'&&user.api_key):null;
+      if(!owner) throw new Error('未找到默认管理用户。已有自定义工作区请使用 Studio 连接设置，应用不会覆盖它。');
+      const connection={accountId:'fnos',userId:'owner',adminApiKey:owner.api_key,apiKey:owner.api_key,baseUrl:location.origin+prefix};
+      localStorage.setItem('ov_console_connection',JSON.stringify(connection));
+      key.value=''; status.textContent='连接成功，正在打开 Studio…'; location.replace(prefix+'/studio/home');
+    } catch(error) {
+      status.textContent=error.name==='AbortError'?'连接超时，请稍后重试。':error instanceof TypeError?'连接失败，请检查网络和应用状态。':error.message;
+      key.readOnly=false; key.focus();
+    } finally { clearTimeout(timeout); submit.disabled=false; key.readOnly=false; }
+  });
+</script>
+</body>
+</html>

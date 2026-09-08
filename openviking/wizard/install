@@ -1,0 +1,60 @@
+[
+  {
+    "stepTitle": "OpenViking 纯文本设置",
+    "items": [
+      {
+        "type": "tips",
+        "helpText": "纯文本模式：无需 VLM，不提供生成式摘要和图片理解。端口 1933。Root API Key 用于登录 Studio。"
+      },
+      {
+        "type": "password",
+        "field": "wizard_root_key",
+        "label": "Root API Key（至少 24 字符）",
+        "rules": [
+          {
+            "required": true,
+            "message": "请填写此项"
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "field": "wizard_embed_base",
+        "label": "Embedding API 地址（含 /v1）",
+        "rules": [
+          {
+            "required": true,
+            "message": "请填写此项"
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "field": "wizard_embed_model",
+        "label": "Embedding 模型",
+        "rules": [
+          {
+            "required": true,
+            "message": "请填写此项"
+          }
+        ]
+      },
+      {
+        "type": "password",
+        "field": "wizard_embed_key",
+        "label": "Embedding API Key（本地服务可留空）"
+      },
+      {
+        "type": "text",
+        "field": "wizard_embed_dimension",
+        "label": "Embedding 维度",
+        "rules": [
+          {
+            "required": true,
+            "message": "请填写此项"
+          }
+        ]
+      }
+    ]
+  }
+]

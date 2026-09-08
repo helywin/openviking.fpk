@@ -1,0 +1,28 @@
+#!/bin/bash
+set -eu
+source "$(dirname "$0")/common.sh"
+case "${1:-}" in
+start)
+    if [ "$VARIANT" = local ]; then
+        bash "$(dirname "$0")/install_callback" --image-only
+        docker compose -p "$TRIM_APPNAME" -f "$TRIM_APPDEST/docker/docker-compose.yaml" up -d --pull never || fail '容器启动失败'
+        for attempt in $(seq 1 150); do
+            state=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{end}}' openviking-fnos 2>/dev/null || true)
+            [ "$state" = healthy ] && exit 0
+            sleep 1
+        done
+        fail '应用初始化超时，请检查日志'
+    fi
+    exit 0 ;;
+stop)
+    if [ "$VARIANT" = local ]; then
+        docker compose -p "$TRIM_APPNAME" -f "$TRIM_APPDEST/docker/docker-compose.yaml" stop --timeout 30
+    fi
+    exit 0 ;;
+status)
+    name=openviking-fnos
+    state=$(docker inspect --format '{{.State.Status}}/{{if .State.Health}}{{.State.Health.Status}}{{end}}' "$name" 2>/dev/null) || exit 3
+    [ "$state" = "running/healthy" ] && exit 0
+    exit 3 ;;
+*) exit 1 ;;
+esac

@@ -1,0 +1,9 @@
+#!/bin/bash
+source "$(dirname "$0")/common.sh"
+name=openviking-fnos
+running=$(docker inspect --format '{{.State.Running}}' "$name" 2>/dev/null || true)
+if [ "$running" = true ]; then docker stop --time 30 "$name" >/dev/null || fail '无法停止旧版本'; fi
+if ! helper backup; then
+    if [ "$running" = true ]; then docker start "$name" >/dev/null || true; fi
+    fail '完整数据快照失败，已中止升级'
+fi

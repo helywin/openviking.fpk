@@ -1,0 +1,36 @@
+[
+  {
+    "stepTitle": "OpenViking 纯文本设置",
+    "items": [
+      {
+        "type": "tips",
+        "helpText": "留空保留原值。修改后请在应用中心停止并重新启动。模型与维度不可直接更换。"
+      },
+      {
+        "type": "password",
+        "field": "wizard_root_key",
+        "label": "Root API Key（至少 24 字符）"
+      },
+      {
+        "type": "text",
+        "field": "wizard_embed_base",
+        "label": "Embedding API 地址（含 /v1）"
+      },
+      {
+        "type": "text",
+        "field": "wizard_embed_model",
+        "label": "Embedding 模型"
+      },
+      {
+        "type": "password",
+        "field": "wizard_embed_key",
+        "label": "Embedding API Key（本地服务可留空）"
+      },
+      {
+        "type": "text",
+        "field": "wizard_embed_dimension",
+        "label": "Embedding 维度"
+      }
+    ]
+  }
+]

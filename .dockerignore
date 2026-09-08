@@ -1,0 +1,4 @@
+**
+!docker/
+!docker/local/
+!docker/local/Dockerfile

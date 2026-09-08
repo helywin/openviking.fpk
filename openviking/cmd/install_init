@@ -1,0 +1,8 @@
+#!/bin/bash
+if [ -f /var/apps/openviking-local/manifest ]; then
+    message='检测到旧版 openviking-local；新应用 ID 不会自动继承数据，请先完成停机快照、保留数据卸载及迁移准备。'
+    printf '%s\n' "$message" >&2
+    if [ -n "${TRIM_TEMP_LOGFILE:-}" ]; then printf '%s\n' "$message" > "$TRIM_TEMP_LOGFILE"; fi
+    exit 1
+fi
+exit 0

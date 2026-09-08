@@ -1,0 +1,20 @@
+#!/bin/bash
+source "$(dirname "$0")/common.sh"
+ensure_image() {
+docker info >/dev/null 2>&1 || fail 'Docker 服务不可用或安装脚本缺少访问权限'
+if ! docker image inspect "$IMAGE" >/dev/null 2>&1; then
+    if [ -f "$TRIM_APPDEST/runtime-image.tar" ]; then
+        expected=$(sed -n 's/.*"image_archive_sha256": "\([a-f0-9]*\)".*/\1/p' "$TRIM_APPDEST/settings.json")
+        [ ${#expected} -eq 64 ] || fail '离线镜像校验信息无效'
+        actual=$(sha256sum "$TRIM_APPDEST/runtime-image.tar" | cut -d ' ' -f 1)
+        [ "$actual" = "$expected" ] || fail '离线镜像校验失败'
+        docker load -i "$TRIM_APPDEST/runtime-image.tar" >/dev/null || fail '离线镜像导入失败'
+        docker image inspect "$IMAGE" >/dev/null 2>&1 || fail '导入的镜像标识不匹配'
+    else
+    case "$IMAGE" in sha256:*) fail '此测试包要求先在 NAS 加载指定的本地镜像';; esac
+    docker pull "$IMAGE" || fail '镜像拉取失败；请检查 NAS 网络'
+    fi
+fi
+}
+ensure_image
+if [ "${1:-}" != '--image-only' ]; then configure; fi

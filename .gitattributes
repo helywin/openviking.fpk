@@ -1,0 +1,6 @@
+* text=auto
+*.py text eol=lf
+*.sh text eol=lf
+openviking/cmd/* text eol=lf
+openviking/wizard/* text eol=lf
+*.yaml text eol=lf
